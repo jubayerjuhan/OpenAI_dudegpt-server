@@ -9,6 +9,7 @@ import "dotenv/config";
 const app = express();
 import { Configuration, OpenAIApi } from "openai";
 import { getTranslation } from "./googletranslate/getTranslation.js";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 app.use(cors());
 
@@ -20,7 +21,13 @@ export const openai = new OpenAIApi(configuration);
 
 app.post("/search", async (req, res, next) => {
   const result = await getDataFromSearch(req.query.q);
-  const translated = await getTranslation(result);
+
+  if (!result) {
+    return res.status(500).json({
+      success: false,
+      message: "AI Process Stopped For Unknown Reason",
+    });
+  }
   res.status(200).json({
     result: result,
     success: true,
@@ -29,6 +36,13 @@ app.post("/search", async (req, res, next) => {
 });
 app.post("/searchimage", async (req, res, next) => {
   const result = await getImageFromSearch(req.query.q);
+
+  if (!result) {
+    return res.status(500).json({
+      success: false,
+      message: "AI Process Stopped For Unknown Reason",
+    });
+  }
   res.status(200).json({
     images: result,
     success: true,
@@ -38,3 +52,5 @@ app.post("/searchimage", async (req, res, next) => {
 app.listen(process.env.PORT, () => {
   console.log(`App Listening On Port ${process.env.PORT}`);
 });
+
+app.use(errorMiddleware);
