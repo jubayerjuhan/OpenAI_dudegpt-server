@@ -31,7 +31,6 @@ app.post("/search", async (req, res, next) => {
   res.status(200).json({
     result: result,
     success: true,
-    translated: translated,
   });
 });
 app.post("/searchimage", async (req, res, next) => {
